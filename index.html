@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+    <div class="glass-card">
+        <header class="hero">
+            <h1>🌤 Weather App</h1>
+            <p>Check live weather for any city with a clean, modern interface.</p>
+        </header>
+
+        <div class="search-panel">
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="cityInput"
+                    placeholder="Enter city name"
+                    autocomplete="off">
+                <button id="searchBtn">Search</button>
+            </div>
+        </div>
+
+        <section id="weatherResult" class="weather-card fade-in">
+            <h2>Search a city</h2>
+            <p>Type a location and tap Search to view current weather conditions.</p>
+        </section>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
