@@ -42,6 +42,29 @@ function formatDate(date) {
     });
 }
 
+const liveClock = document.getElementById("liveClock");
+
+function formatTime(date) {
+    return date.toLocaleTimeString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+}
+
+function updateClock() {
+    const now = new Date();
+    const timeString = formatTime(now);
+    const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
+    const dateString = now.toLocaleDateString(undefined, {
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+    });
+    liveClock.textContent = `${weekday}, ${dateString} · ${timeString}`;
+}
+
 function getWeatherCondition(code) {
     return weatherCodeMap[code] || { label: "Unknown", emoji: "🌥️" };
 }
@@ -102,3 +125,6 @@ cityInput.addEventListener("keypress", (event) => {
         getWeather();
     }
 });
+
+updateClock();
+setInterval(updateClock, 1000);
