@@ -1,6 +1,7 @@
 const cityInput = document.getElementById("cityInput");
 const searchBtn = document.getElementById("searchBtn");
 const weatherResult = document.getElementById("weatherResult");
+const loader = document.getElementById("loader");
 
 const weatherCodeMap = {
     0: { label: "Sunny", emoji: "☀️" },
@@ -65,6 +66,14 @@ function updateClock() {
     liveClock.textContent = `${weekday}, ${dateString} · ${timeString}`;
 }
 
+function showLoader() {
+    loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+    loader.classList.add("hidden");
+}
+
 function getWeatherCondition(code) {
     return weatherCodeMap[code] || { label: "Unknown", emoji: "🌥️" };
 }
@@ -76,6 +85,8 @@ async function getWeather() {
         alert("Enter a city name.");
         return;
     }
+
+    showLoader();
 
     try {
         const geoResponse = await fetch(
@@ -115,6 +126,8 @@ async function getWeather() {
         `;
     } catch (error) {
         weatherResult.innerHTML = "<h2>Something went wrong.</h2>";
+    } finally {
+        hideLoader();
     }
 }
 
