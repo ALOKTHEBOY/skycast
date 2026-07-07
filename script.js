@@ -2,6 +2,7 @@ const cityInput = document.getElementById("cityInput");
 const searchBtn = document.getElementById("searchBtn");
 const weatherResult = document.getElementById("weatherResult");
 const loader = document.getElementById("loader");
+let isLoading = false;
 
 const weatherCodeMap = {
     0: { label: "Sunny", emoji: "☀️" },
@@ -68,10 +69,16 @@ function updateClock() {
 
 function showLoader() {
     loader.classList.remove("hidden");
+    searchBtn.disabled = true;
+    searchBtn.setAttribute('aria-disabled', 'true');
+    isLoading = true;
 }
 
 function hideLoader() {
     loader.classList.add("hidden");
+    searchBtn.disabled = false;
+    searchBtn.removeAttribute('aria-disabled');
+    isLoading = false;
 }
 
 function getWeatherCondition(code) {
@@ -79,7 +86,11 @@ function getWeatherCondition(code) {
 }
 
 async function getWeather() {
+    if (isLoading) return;
+
     const city = cityInput.value.trim();
+    // reflect trimmed value back into the input to remove extra spaces
+    cityInput.value = city;
 
     if (city === "") {
         alert("Enter a city name.");
@@ -208,6 +219,8 @@ async function getWeather() {
         renderErrorCard("Something went wrong", "Please try again or check your connection.");
     } finally {
         hideLoader();
+        // focus input after results/error shown
+        try { cityInput.focus({ preventScroll: true }); } catch (e) { cityInput.focus(); }
     }
 }
 
@@ -232,8 +245,10 @@ function renderErrorCard(title, message) {
 
 searchBtn.addEventListener("click", getWeather);
 
-cityInput.addEventListener("keypress", (event) => {
+// Use keydown for reliable Enter handling and trim before searching
+cityInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
+        event.preventDefault();
         getWeather();
     }
 });
