@@ -180,6 +180,55 @@ body::before {
     animation: fadeInUp 0.7s ease 0.18s both;
 }
 
+/* Error card (glassmorphism) */
+.error-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    padding: 28px 22px;
+    text-align: center;
+}
+
+.error-card .emoji {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.error-card h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #fff;
+}
+
+.error-card p {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.95rem;
+}
+
+.retry-btn {
+    margin-top: 6px;
+    padding: 10px 18px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    color: var(--text-light);
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(8, 40, 80, 0.12);
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.retry-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(8, 40, 80, 0.16);
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
 .weather-card h2 {
     font-size: 1.75rem;
     margin-bottom: 14px;
@@ -193,6 +242,44 @@ body::before {
 
 .weather-card p:not(:last-child) {
     margin-bottom: 12px;
+}
+
+/* Info cards for additional weather details */
+.info-cards {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.info-card {
+    flex: 1 1 140px;
+    min-width: 120px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 12px 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+}
+
+.info-card .card-title {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+}
+
+.info-card .card-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-light);
+}
+
+.info-card .card-sub {
+    font-size: 0.85rem;
+    color: rgba(214,225,255,0.7);
 }
 
 @keyframes gradient {
