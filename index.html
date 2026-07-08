@@ -41,6 +41,17 @@
             <p>Type a location and tap Search to view current weather conditions.</p>
         </section>
 
+        <section id="forecastSection" class="forecast-section" aria-live="polite">
+            <div class="recent-searches-header">
+                <h3>7-Day Forecast</h3>
+            </div>
+            <div id="forecastLoading" class="forecast-loading hidden">
+                <div class="spinner"></div>
+                <span>Loading forecast...</span>
+            </div>
+            <div id="forecastList" class="forecast-list"></div>
+        </section>
+
         <section id="smartTips" class="tips-section" aria-live="polite">
             <div class="recent-searches-header">
                 <h3>Today's Tips</h3>

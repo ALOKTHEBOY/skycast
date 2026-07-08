@@ -11,6 +11,8 @@ const compareBtn = document.getElementById("compareBtn");
 const compareResults = document.getElementById("compareResults");
 const liveClock = document.getElementById("liveClock");
 const greeting = document.getElementById("greeting");
+const forecastLoading = document.getElementById("forecastLoading");
+const forecastList = document.getElementById("forecastList");
 let isLoading = false;
 const STORAGE_KEY = "weatherAppRecentSearches";
 const FAVORITES_KEY = "weatherAppFavoriteCities";
@@ -213,6 +215,71 @@ function updateClock() {
     }
 }
 
+function showForecastLoading() {
+    if (forecastLoading) {
+        forecastLoading.classList.remove("hidden");
+    }
+    if (forecastList) {
+        forecastList.innerHTML = "";
+    }
+}
+
+function hideForecastLoading() {
+    if (forecastLoading) {
+        forecastLoading.classList.add("hidden");
+    }
+}
+
+function renderForecastPlaceholder(message = "Search for a city to see the 7-day forecast.") {
+    if (!forecastList) return;
+    forecastList.innerHTML = `<div class="forecast-empty">${message}</div>`;
+}
+
+function buildForecastItems(weatherData) {
+    const daily = weatherData?.daily || {};
+    const times = daily.time || [];
+    const weathercodes = daily.weathercode || [];
+    const maxTemps = daily.temperature_2m_max || [];
+    const minTemps = daily.temperature_2m_min || [];
+
+    const count = Math.min(7, times.length, weathercodes.length, maxTemps.length, minTemps.length);
+    if (count <= 0) return [];
+
+    return Array.from({ length: count }, (_, index) => {
+        const date = new Date(times[index]);
+        const condition = getWeatherCondition(weathercodes[index]);
+        return {
+            dayName: date.toLocaleDateString(undefined, { weekday: "short" }),
+            dayLabel: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+            condition,
+            maxTemp: maxTemps[index] !== undefined ? `${Math.round(maxTemps[index])}°C` : "N/A",
+            minTemp: minTemps[index] !== undefined ? `${Math.round(minTemps[index])}°C` : "N/A"
+        };
+    });
+}
+
+function renderForecastCards(items) {
+    if (!forecastList) return;
+
+    if (!items || items.length === 0) {
+        renderForecastPlaceholder("Forecast unavailable right now.");
+        return;
+    }
+
+    forecastList.innerHTML = items.map((item) => `
+        <article class="forecast-card">
+            <div class="forecast-day">${item.dayName}</div>
+            <div class="forecast-date">${item.dayLabel}</div>
+            <div class="forecast-icon" aria-hidden="true">${item.condition.emoji}</div>
+            <div class="forecast-condition">${item.condition.label}</div>
+            <div class="forecast-temps">
+                <span class="forecast-temp-max">↑ ${item.maxTemp}</span>
+                <span class="forecast-temp-min">↓ ${item.minTemp}</span>
+            </div>
+        </article>
+    `).join("");
+}
+
 function showLoader() {
     loader.classList.remove("hidden");
     searchBtn.disabled = true;
@@ -311,6 +378,7 @@ async function getWeather(cityNameOverride = "") {
     }
 
     showLoader();
+    showForecastLoading();
 
     try {
         const geoResponse = await fetch(
@@ -331,7 +399,7 @@ async function getWeather(cityNameOverride = "") {
 
         // Request more fields: current_weather, hourly apparent temp & humidity, daily sunrise/sunset, and timezone
         const weatherResponse = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature,relativehumidity_2m&daily=sunrise,sunset&timezone=auto`
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto`
         );
 
         const weatherData = await weatherResponse.json();
@@ -392,6 +460,9 @@ async function getWeather(cityNameOverride = "") {
             if (idx !== -1) temperature = weatherData.hourly.apparent_temperature[idx];
         }
 
+        const forecastItems = buildForecastItems(weatherData);
+        renderForecastCards(forecastItems);
+
         addRecentSearch(cityName);
         saveLastCity(cityName);
         applyWeatherTheme(condition.label);
@@ -412,8 +483,10 @@ async function getWeather(cityNameOverride = "") {
 
         renderWeatherCard(weatherCardProps);
     } catch (error) {
+        renderForecastPlaceholder("Unable to load the 7-day forecast right now.");
         renderErrorCard("Something went wrong", "Please try again or check your connection.");
     } finally {
+        hideForecastLoading();
         hideLoader();
         // focus input after results/error shown
         try { cityInput.focus({ preventScroll: true }); } catch (e) { cityInput.focus(); }
@@ -555,7 +628,7 @@ async function fetchWeatherData(city) {
     const country = geoData.results[0].country;
 
     const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature,relativehumidity_2m&daily=sunrise,sunset&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto`
     );
 
     const weatherData = await weatherResponse.json();
@@ -724,6 +797,7 @@ if (compareBtn) {
 
 renderFavoriteCities();
 renderRecentSearches();
+renderForecastPlaceholder();
 renderTips({
     condition: { label: "" },
     temperature: "",
