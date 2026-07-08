@@ -2,7 +2,63 @@ const cityInput = document.getElementById("cityInput");
 const searchBtn = document.getElementById("searchBtn");
 const weatherResult = document.getElementById("weatherResult");
 const loader = document.getElementById("loader");
+const recentSearchesList = document.getElementById("recentSearchesList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+const liveClock = document.getElementById("liveClock");
 let isLoading = false;
+const STORAGE_KEY = "weatherAppRecentSearches";
+
+function loadRecentSearches() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return [];
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+let recentSearches = loadRecentSearches();
+
+function saveRecentSearches() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(recentSearches));
+}
+
+function renderRecentSearches() {
+    if (!recentSearchesList) return;
+
+    if (recentSearches.length === 0) {
+        recentSearchesList.innerHTML = '<li class="empty-history">Your successful searches will appear here.</li>';
+        return;
+    }
+
+    recentSearchesList.innerHTML = recentSearches
+        .map((city) => `
+            <li>
+                <button class="recent-search-chip" type="button" data-city="${city}">${city}</button>
+            </li>
+        `)
+        .join("");
+}
+
+function addRecentSearch(cityName) {
+    const cleanedName = cityName.trim();
+    if (!cleanedName) return;
+
+    const normalizedName = cleanedName.toLowerCase();
+    recentSearches = recentSearches.filter((item) => item.toLowerCase() !== normalizedName);
+    recentSearches.unshift(cleanedName);
+    recentSearches = recentSearches.slice(0, 8);
+    saveRecentSearches();
+    renderRecentSearches();
+}
+
+function clearRecentSearches() {
+    recentSearches = [];
+    saveRecentSearches();
+    renderRecentSearches();
+}
 
 const weatherCodeMap = {
     0: { label: "Sunny", emoji: "☀️" },
@@ -43,8 +99,6 @@ function formatDate(date) {
         day: "numeric"
     });
 }
-
-const liveClock = document.getElementById("liveClock");
 
 function formatTime(date) {
     return date.toLocaleTimeString(undefined, {
@@ -179,6 +233,8 @@ async function getWeather() {
             if (idx !== -1) temperature = weatherData.hourly.apparent_temperature[idx];
         }
 
+        addRecentSearch(cityName);
+
         weatherResult.innerHTML = `
             <div class="weather-header">
                 <h2>${condition.emoji} ${condition.label}</h2>
@@ -253,5 +309,23 @@ cityInput.addEventListener("keydown", (event) => {
     }
 });
 
+if (recentSearchesList) {
+    recentSearchesList.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-city]");
+        if (!button) return;
+
+        const city = button.getAttribute("data-city");
+        if (!city) return;
+
+        cityInput.value = city;
+        getWeather();
+    });
+}
+
+if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener("click", clearRecentSearches);
+}
+
+renderRecentSearches();
 updateClock();
 setInterval(updateClock, 1000);
