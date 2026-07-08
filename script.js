@@ -5,6 +5,10 @@ const loader = document.getElementById("loader");
 const recentSearchesList = document.getElementById("recentSearchesList");
 const favoriteCitiesList = document.getElementById("favoriteCitiesList");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+const compareCityOne = document.getElementById("compareCityOne");
+const compareCityTwo = document.getElementById("compareCityTwo");
+const compareBtn = document.getElementById("compareBtn");
+const compareResults = document.getElementById("compareResults");
 const liveClock = document.getElementById("liveClock");
 let isLoading = false;
 const STORAGE_KEY = "weatherAppRecentSearches";
@@ -386,6 +390,133 @@ function renderWeatherCard(props) {
     }
 }
 
+async function fetchWeatherData(city) {
+    const geoResponse = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+    );
+
+    const geoData = await geoResponse.json();
+    if (!geoData.results) {
+        throw new Error("City not found");
+    }
+
+    const latitude = geoData.results[0].latitude;
+    const longitude = geoData.results[0].longitude;
+    const cityName = geoData.results[0].name;
+    const country = geoData.results[0].country;
+
+    const weatherResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature,relativehumidity_2m&daily=sunrise,sunset&timezone=auto`
+    );
+
+    const weatherData = await weatherResponse.json();
+    const current = weatherData.current_weather || {};
+    const condition = getWeatherCondition(current.weathercode);
+
+    let feelsLike = "N/A";
+    if (weatherData.hourly && weatherData.hourly.time) {
+        const times = weatherData.hourly.time;
+        const idx = times.indexOf(current.time);
+        if (idx !== -1 && weatherData.hourly.apparent_temperature) {
+            const val = weatherData.hourly.apparent_temperature[idx];
+            feelsLike = `${Math.round(val)} °C`;
+        }
+    }
+
+    let sunrise = "N/A";
+    let sunset = "N/A";
+    if (weatherData.daily) {
+        if (weatherData.daily.sunrise && weatherData.daily.sunrise.length > 0) {
+            const sr = new Date(weatherData.daily.sunrise[0]);
+            sunrise = sr.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+        if (weatherData.daily.sunset && weatherData.daily.sunset.length > 0) {
+            const ss = new Date(weatherData.daily.sunset[0]);
+            sunset = ss.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+    }
+
+    let humidity = 'N/A';
+    let wind = 'N/A';
+    if (weatherData.hourly && weatherData.hourly.relativehumidity_2m) {
+        const times = weatherData.hourly.time;
+        const idx = times.indexOf(current.time);
+        if (idx !== -1) humidity = weatherData.hourly.relativehumidity_2m[idx];
+    }
+    if (current.windspeed !== undefined) {
+        wind = current.windspeed;
+    }
+
+    let temperature = 'N/A';
+    if (current.temperature !== undefined) {
+        temperature = current.temperature;
+    } else if (weatherData.hourly && weatherData.hourly.apparent_temperature) {
+        const times = weatherData.hourly.time;
+        const idx = times.indexOf(current.time);
+        if (idx !== -1) temperature = weatherData.hourly.apparent_temperature[idx];
+    }
+
+    return {
+        cityName,
+        country,
+        condition,
+        temperature,
+        feelsLike,
+        humidity,
+        wind,
+        sunrise,
+        sunset,
+        timezone: weatherData.timezone || "UTC"
+    };
+}
+
+async function compareCities() {
+    const cityOne = compareCityOne.value.trim();
+    const cityTwo = compareCityTwo.value.trim();
+
+    if (!cityOne || !cityTwo) {
+        if (compareResults) {
+            compareResults.innerHTML = '<p class="empty-history">Please enter two cities to compare.</p>';
+        }
+        return;
+    }
+
+    showLoader();
+
+    try {
+        const [firstCity, secondCity] = await Promise.all([
+            fetchWeatherData(cityOne),
+            fetchWeatherData(cityTwo)
+        ]);
+
+        renderCompareResults([firstCity, secondCity]);
+    } catch (error) {
+        if (compareResults) {
+            compareResults.innerHTML = '<p class="empty-history">Unable to compare those cities right now.</p>';
+        }
+    } finally {
+        hideLoader();
+    }
+}
+
+function renderCompareResults(cities) {
+    if (!compareResults) return;
+
+    compareResults.innerHTML = cities.map((city) => `
+        <div class="compare-card">
+            <h4>${city.cityName}, ${city.country}</h4>
+            <p><strong>${city.condition.emoji}</strong> ${city.condition.label}</p>
+            <p>🌡 Temperature: ${city.temperature} °C</p>
+            <p>🌡 Feels Like: ${city.feelsLike}</p>
+            <p>💧 Humidity: ${city.humidity}%</p>
+            <p>🌬 Wind: ${city.wind} km/h</p>
+            <p>🌅 Sunrise: ${city.sunrise}</p>
+            <p>🌇 Sunset: ${city.sunset}</p>
+            <p>🕒 Timezone: ${city.timezone}</p>
+        </div>
+    `).join("");
+}
+
 function renderErrorCard(title, message) {
     weatherResult.innerHTML = `
         <div class="error-card">
@@ -436,6 +567,10 @@ if (favoriteCitiesList) {
 
 if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", clearRecentSearches);
+}
+
+if (compareBtn) {
+    compareBtn.addEventListener("click", compareCities);
 }
 
 renderFavoriteCities();

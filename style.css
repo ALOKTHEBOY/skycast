@@ -181,7 +181,8 @@ body::before {
 }
 
 .favorite-searches,
-.recent-searches {
+.recent-searches,
+.compare-section {
     margin-top: 18px;
     padding: 20px 18px;
     border-radius: 22px;
@@ -245,6 +246,63 @@ body::before {
     color: var(--text-soft);
     font-size: 0.95rem;
     padding: 6px 2px;
+}
+
+.compare-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.compare-inputs input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    font-size: 0.95rem;
+    padding: 12px 14px;
+    border-radius: 14px;
+}
+
+.compare-inputs input::placeholder {
+    color: rgba(245, 248, 255, 0.65);
+}
+
+.compare-inputs button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
+.compare-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.compare-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    padding: 16px;
+}
+
+.compare-card h4 {
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+}
+
+.compare-card p {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .weather-actions {
@@ -413,6 +471,14 @@ body::before {
 
     .search-box button {
         width: 100%;
+    }
+
+    .compare-inputs {
+        grid-template-columns: 1fr;
+    }
+
+    .compare-results {
+        grid-template-columns: 1fr;
     }
 }
 
