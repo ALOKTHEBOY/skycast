@@ -140,34 +140,34 @@ function toggleFavorite(cityName) {
 }
 
 const weatherCodeMap = {
-    0: { label: "Sunny", emoji: "☀️" },
-    1: { label: "Mainly Clear", emoji: "🌤️" },
-    2: { label: "Partly Cloudy", emoji: "⛅" },
-    3: { label: "Cloudy", emoji: "☁️" },
-    45: { label: "Fog", emoji: "🌫️" },
-    48: { label: "Fog", emoji: "🌫️" },
-    51: { label: "Drizzle", emoji: "🌦️" },
-    53: { label: "Drizzle", emoji: "🌦️" },
-    55: { label: "Drizzle", emoji: "🌦️" },
-    56: { label: "Freezing Drizzle", emoji: "🌧️" },
-    57: { label: "Freezing Drizzle", emoji: "🌧️" },
-    61: { label: "Rainy", emoji: "🌧️" },
-    63: { label: "Rainy", emoji: "🌧️" },
-    65: { label: "Rainy", emoji: "🌧️" },
-    66: { label: "Freezing Rain", emoji: "🌧️" },
-    67: { label: "Freezing Rain", emoji: "🌧️" },
-    71: { label: "Snow", emoji: "❄️" },
-    73: { label: "Snow", emoji: "❄️" },
-    75: { label: "Snow", emoji: "❄️" },
-    77: { label: "Snow", emoji: "❄️" },
-    80: { label: "Rain Showers", emoji: "🌦️" },
-    81: { label: "Rain Showers", emoji: "🌦️" },
-    82: { label: "Rain Showers", emoji: "🌧️" },
-    85: { label: "Snow Showers", emoji: "🌨️" },
-    86: { label: "Snow Showers", emoji: "🌨️" },
-    95: { label: "Thunderstorm", emoji: "⛈️" },
-    96: { label: "Thunderstorm", emoji: "⛈️" },
-    99: { label: "Thunderstorm", emoji: "⛈️" }
+    0: { label: "Sunny", shortLabel: "Sun", emoji: "☀️" },
+    1: { label: "Mainly Clear", shortLabel: "Clear", emoji: "🌤️" },
+    2: { label: "Partly Cloudy", shortLabel: "Clouds", emoji: "⛅" },
+    3: { label: "Cloudy", shortLabel: "Cloudy", emoji: "☁️" },
+    45: { label: "Fog", shortLabel: "Fog", emoji: "🌫️" },
+    48: { label: "Fog", shortLabel: "Fog", emoji: "🌫️" },
+    51: { label: "Drizzle", shortLabel: "Drizzle", emoji: "🌦️" },
+    53: { label: "Drizzle", shortLabel: "Drizzle", emoji: "🌦️" },
+    55: { label: "Drizzle", shortLabel: "Drizzle", emoji: "🌦️" },
+    56: { label: "Freezing Drizzle", shortLabel: "Freeze", emoji: "🌧️" },
+    57: { label: "Freezing Drizzle", shortLabel: "Freeze", emoji: "🌧️" },
+    61: { label: "Rainy", shortLabel: "Rain", emoji: "🌧️" },
+    63: { label: "Rainy", shortLabel: "Rain", emoji: "🌧️" },
+    65: { label: "Rainy", shortLabel: "Rain", emoji: "🌧️" },
+    66: { label: "Freezing Rain", shortLabel: "Freeze", emoji: "🌧️" },
+    67: { label: "Freezing Rain", shortLabel: "Freeze", emoji: "🌧️" },
+    71: { label: "Snow", shortLabel: "Snow", emoji: "❄️" },
+    73: { label: "Snow", shortLabel: "Snow", emoji: "❄️" },
+    75: { label: "Snow", shortLabel: "Snow", emoji: "❄️" },
+    77: { label: "Snow", shortLabel: "Snow", emoji: "❄️" },
+    80: { label: "Rain Showers", shortLabel: "Showers", emoji: "🌦️" },
+    81: { label: "Rain Showers", shortLabel: "Showers", emoji: "🌦️" },
+    82: { label: "Rain Showers", shortLabel: "Showers", emoji: "🌧️" },
+    85: { label: "Snow Showers", shortLabel: "Snow", emoji: "🌨️" },
+    86: { label: "Snow Showers", shortLabel: "Snow", emoji: "🌨️" },
+    95: { label: "Thunderstorm", shortLabel: "Storm", emoji: "⛈️" },
+    96: { label: "Thunderstorm", shortLabel: "Storm", emoji: "⛈️" },
+    99: { label: "Thunderstorm", shortLabel: "Storm", emoji: "⛈️" }
 };
 
 function formatDate(date) {
@@ -220,7 +220,14 @@ function showForecastLoading() {
         forecastLoading.classList.remove("hidden");
     }
     if (forecastList) {
-        forecastList.innerHTML = "";
+        forecastList.innerHTML = Array.from({ length: 6 }, (_, index) => `
+            <div class="forecast-skeleton" aria-hidden="true">
+                <div class="forecast-skeleton-line short"></div>
+                <div class="forecast-skeleton-line medium"></div>
+                <div class="forecast-skeleton-line tall"></div>
+                <div class="forecast-skeleton-line short"></div>
+            </div>
+        `).join("");
     }
 }
 
@@ -271,7 +278,7 @@ function renderForecastCards(items) {
             <div class="forecast-day">${item.dayName}</div>
             <div class="forecast-date">${item.dayLabel}</div>
             <div class="forecast-icon" aria-hidden="true">${item.condition.emoji}</div>
-            <div class="forecast-condition">${item.condition.label}</div>
+            <div class="forecast-condition">${item.condition.shortLabel || item.condition.label}</div>
             <div class="forecast-temps">
                 <span class="forecast-temp-max">↑ ${item.maxTemp}</span>
                 <span class="forecast-temp-min">↓ ${item.minTemp}</span>

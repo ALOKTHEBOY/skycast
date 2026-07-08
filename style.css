@@ -305,7 +305,7 @@ body.theme-clear .glass-card {
 .forecast-section {
     margin-top: 18px;
     padding: 20px 18px;
-    border-radius: 22px;
+    border-radius: 24px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
@@ -316,11 +316,13 @@ body.theme-clear .glass-card {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 16px;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.06);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-light);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
 }
 
 .forecast-loading.hidden {
@@ -331,51 +333,63 @@ body.theme-clear .glass-card {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 10px;
+    align-items: stretch;
 }
 
 .forecast-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 14px 10px;
+    justify-content: center;
+    gap: 7px;
+    min-height: 148px;
+    padding: 13px 10px;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.07);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.05));
     border: 1px solid rgba(255, 255, 255, 0.12);
     text-align: center;
-    transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease, border-color 220ms ease;
 }
 
 .forecast-card:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px) scale(1.01);
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 10px 22px rgba(7, 24, 49, 0.16);
 }
 
 .forecast-day {
     font-weight: 700;
+    font-size: 0.95rem;
     color: var(--text-light);
+    letter-spacing: 0.01em;
 }
 
 .forecast-date {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     color: var(--text-soft);
 }
 
 .forecast-icon {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
+    line-height: 1;
+    margin: 2px 0;
 }
 
 .forecast-condition {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
+    font-weight: 600;
     color: var(--text-soft);
     min-height: 2.2em;
+    line-height: 1.25;
 }
 
 .forecast-temps {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    font-size: 0.88rem;
     font-weight: 700;
 }
 
@@ -393,6 +407,53 @@ body.theme-clear .glass-card {
     text-align: center;
     color: var(--text-soft);
     background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.forecast-skeleton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 148px;
+    padding: 13px 10px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.forecast-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+    animation: forecastPulse 1.2s ease-in-out infinite;
+}
+
+.forecast-skeleton-line {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.forecast-skeleton-line.short {
+    width: 58%;
+}
+
+.forecast-skeleton-line.medium {
+    width: 78%;
+}
+
+.forecast-skeleton-line.tall {
+    width: 64%;
+}
+
+@keyframes forecastPulse {
+    100% { transform: translateX(100%); }
 }
 
 .tips-card {
@@ -662,13 +723,16 @@ body.theme-clear .glass-card {
     .forecast-list {
         display: grid;
         grid-auto-flow: column;
-        grid-auto-columns: minmax(120px, 1fr);
+        grid-auto-columns: minmax(118px, 1fr);
         overflow-x: auto;
         padding-bottom: 6px;
         scroll-snap-type: x proximity;
+        gap: 8px;
     }
 
-    .forecast-card {
+    .forecast-card,
+    .forecast-skeleton {
+        min-height: 142px;
         scroll-snap-align: start;
     }
 }
