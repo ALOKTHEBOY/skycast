@@ -10,6 +10,7 @@ const compareCityTwo = document.getElementById("compareCityTwo");
 const compareBtn = document.getElementById("compareBtn");
 const compareResults = document.getElementById("compareResults");
 const liveClock = document.getElementById("liveClock");
+const greeting = document.getElementById("greeting");
 let isLoading = false;
 const STORAGE_KEY = "weatherAppRecentSearches";
 const FAVORITES_KEY = "weatherAppFavoriteCities";
@@ -185,6 +186,14 @@ function formatTime(date) {
     });
 }
 
+function getGreeting(date) {
+    const hour = date.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    if (hour < 22) return "Good Evening";
+    return "Good Night";
+}
+
 function updateClock() {
     const now = new Date();
     const timeString = formatTime(now);
@@ -194,7 +203,14 @@ function updateClock() {
         day: "numeric",
         year: "numeric"
     });
-    liveClock.textContent = `${weekday}, ${dateString} · ${timeString}`;
+
+    if (greeting) {
+        greeting.textContent = getGreeting(now);
+    }
+
+    if (liveClock) {
+        liveClock.textContent = `${weekday} · ${dateString} · ${timeString}`;
+    }
 }
 
 function showLoader() {
