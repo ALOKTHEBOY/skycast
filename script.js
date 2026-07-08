@@ -3,10 +3,12 @@ const searchBtn = document.getElementById("searchBtn");
 const weatherResult = document.getElementById("weatherResult");
 const loader = document.getElementById("loader");
 const recentSearchesList = document.getElementById("recentSearchesList");
+const favoriteCitiesList = document.getElementById("favoriteCitiesList");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 const liveClock = document.getElementById("liveClock");
 let isLoading = false;
 const STORAGE_KEY = "weatherAppRecentSearches";
+const FAVORITES_KEY = "weatherAppFavoriteCities";
 
 function loadRecentSearches() {
     try {
@@ -21,8 +23,25 @@ function loadRecentSearches() {
 
 let recentSearches = loadRecentSearches();
 
+function loadFavorites() {
+    try {
+        const stored = localStorage.getItem(FAVORITES_KEY);
+        if (!stored) return [];
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+let favorites = loadFavorites();
+
 function saveRecentSearches() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recentSearches));
+}
+
+function saveFavorites() {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
 }
 
 function renderRecentSearches() {
@@ -58,6 +77,43 @@ function clearRecentSearches() {
     recentSearches = [];
     saveRecentSearches();
     renderRecentSearches();
+}
+
+function renderFavoriteCities() {
+    if (!favoriteCitiesList) return;
+
+    if (favorites.length === 0) {
+        favoriteCitiesList.innerHTML = '<li class="empty-history">Save your favorite cities here.</li>';
+        return;
+    }
+
+    favoriteCitiesList.innerHTML = favorites
+        .map((city) => `
+            <li>
+                <button class="recent-search-chip" type="button" data-city="${city}">${city}</button>
+            </li>
+        `)
+        .join("");
+}
+
+function isCityFavorite(cityName) {
+    return favorites.some((city) => city.toLowerCase() === cityName.trim().toLowerCase());
+}
+
+function toggleFavorite(cityName) {
+    const cleanedName = cityName.trim();
+    if (!cleanedName) return;
+
+    if (isCityFavorite(cleanedName)) {
+        favorites = favorites.filter((city) => city.toLowerCase() !== cleanedName.toLowerCase());
+    } else {
+        favorites = favorites.filter((city) => city.toLowerCase() !== cleanedName.toLowerCase());
+        favorites.unshift(cleanedName);
+        favorites = favorites.slice(0, 10);
+    }
+
+    saveFavorites();
+    renderFavoriteCities();
 }
 
 const weatherCodeMap = {
@@ -139,10 +195,10 @@ function getWeatherCondition(code) {
     return weatherCodeMap[code] || { label: "Unknown", emoji: "🌥️" };
 }
 
-async function getWeather() {
+async function getWeather(cityNameOverride = "") {
     if (isLoading) return;
 
-    const city = cityInput.value.trim();
+    const city = (cityNameOverride || cityInput.value).trim();
     // reflect trimmed value back into the input to remove extra spaces
     cityInput.value = city;
 
@@ -235,48 +291,81 @@ async function getWeather() {
 
         addRecentSearch(cityName);
 
-        weatherResult.innerHTML = `
-            <div class="weather-header">
-                <h2>${condition.emoji} ${condition.label}</h2>
-                <p>${today}</p>
-            </div>
-            <h3>${cityName}, ${country}</h3>
+        const weatherCardProps = {
+            cityName,
+            country,
+            condition,
+            today,
+            feelsLike,
+            sunrise,
+            sunset,
+            timezone,
+            temperature,
+            humidity,
+            wind
+        };
 
-            <div class="info-cards">
-                <div class="info-card">
-                    <div class="card-title">Feels Like</div>
-                    <div class="card-value">${feelsLike}</div>
-                    <div class="card-sub">apparent temperature</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Sunrise</div>
-                    <div class="card-value">${sunrise}</div>
-                    <div class="card-sub">local time</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Sunset</div>
-                    <div class="card-value">${sunset}</div>
-                    <div class="card-sub">local time</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Timezone</div>
-                    <div class="card-value">${timezone}</div>
-                    <div class="card-sub">data source</div>
-                </div>
-            </div>
-
-            <div style="margin-top:16px">
-                <p>🌡 Temperature: ${temperature} °C</p>
-                <p>💧 Humidity: ${humidity}%</p>
-                <p>🌬 Wind: ${wind} km/h</p>
-            </div>
-        `;
+        renderWeatherCard(weatherCardProps);
     } catch (error) {
         renderErrorCard("Something went wrong", "Please try again or check your connection.");
     } finally {
         hideLoader();
         // focus input after results/error shown
         try { cityInput.focus({ preventScroll: true }); } catch (e) { cityInput.focus(); }
+    }
+}
+
+function renderWeatherCard(props) {
+    const isFavorite = isCityFavorite(props.cityName);
+    weatherResult.innerHTML = `
+        <div class="weather-actions">
+            <button id="favoriteBtn" class="favorite-btn ${isFavorite ? "active" : ""}" type="button" aria-pressed="${isFavorite}">
+                <span class="favorite-icon">${isFavorite ? "★" : "☆"}</span>
+                ${isFavorite ? "Favorited" : "Favorite"}
+            </button>
+        </div>
+        <div class="weather-header">
+            <h2>${props.condition.emoji} ${props.condition.label}</h2>
+            <p>${props.today}</p>
+        </div>
+        <h3>${props.cityName}, ${props.country}</h3>
+
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="card-title">Feels Like</div>
+                <div class="card-value">${props.feelsLike}</div>
+                <div class="card-sub">apparent temperature</div>
+            </div>
+            <div class="info-card">
+                <div class="card-title">Sunrise</div>
+                <div class="card-value">${props.sunrise}</div>
+                <div class="card-sub">local time</div>
+            </div>
+            <div class="info-card">
+                <div class="card-title">Sunset</div>
+                <div class="card-value">${props.sunset}</div>
+                <div class="card-sub">local time</div>
+            </div>
+            <div class="info-card">
+                <div class="card-title">Timezone</div>
+                <div class="card-value">${props.timezone}</div>
+                <div class="card-sub">data source</div>
+            </div>
+        </div>
+
+        <div style="margin-top:16px">
+            <p>🌡 Temperature: ${props.temperature} °C</p>
+            <p>💧 Humidity: ${props.humidity}%</p>
+            <p>🌬 Wind: ${props.wind} km/h</p>
+        </div>
+    `;
+
+    const favoriteBtn = document.getElementById("favoriteBtn");
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener("click", () => {
+            toggleFavorite(props.cityName);
+            renderWeatherCard(props);
+        });
     }
 }
 
@@ -309,23 +398,30 @@ cityInput.addEventListener("keydown", (event) => {
     }
 });
 
+const historyClickHandler = (event) => {
+    const button = event.target.closest("button[data-city]");
+    if (!button) return;
+
+    const city = button.getAttribute("data-city");
+    if (!city) return;
+
+    cityInput.value = city;
+    getWeather(city);
+};
+
 if (recentSearchesList) {
-    recentSearchesList.addEventListener("click", (event) => {
-        const button = event.target.closest("button[data-city]");
-        if (!button) return;
+    recentSearchesList.addEventListener("click", historyClickHandler);
+}
 
-        const city = button.getAttribute("data-city");
-        if (!city) return;
-
-        cityInput.value = city;
-        getWeather();
-    });
+if (favoriteCitiesList) {
+    favoriteCitiesList.addEventListener("click", historyClickHandler);
 }
 
 if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", clearRecentSearches);
 }
 
+renderFavoriteCities();
 renderRecentSearches();
 updateClock();
 setInterval(updateClock, 1000);
