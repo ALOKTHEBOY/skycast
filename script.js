@@ -336,6 +336,63 @@ async function getWeather(cityNameOverride = "") {
     }
 }
 
+function getWeatherTips(props) {
+    const tips = [];
+    const conditionLabel = (props.condition?.label || "").toLowerCase();
+    const temperatureValue = parseFloat(props.temperature);
+    const windValue = parseFloat(props.wind);
+    const humidityValue = parseFloat(props.humidity);
+
+    if (/rain|drizzle|thunderstorm/i.test(conditionLabel)) {
+        tips.push({ icon: "☔", text: "Carry an umbrella." });
+    }
+
+    if (/sunny|mainly clear|clear|partly cloudy/i.test(conditionLabel)) {
+        tips.push({ icon: "🕶️", text: "Wear sunglasses and stay hydrated." });
+    }
+
+    if (!Number.isNaN(temperatureValue) && temperatureValue <= 10) {
+        tips.push({ icon: "🧥", text: "Wear warm clothing." });
+    }
+
+    if (!Number.isNaN(windValue) && windValue >= 20) {
+        tips.push({ icon: "💨", text: "Be careful with loose items outdoors." });
+    }
+
+    if (!Number.isNaN(humidityValue) && humidityValue >= 70) {
+        tips.push({ icon: "💧", text: "Keep water handy and choose breathable clothing." });
+    }
+
+    if (!Number.isNaN(temperatureValue) && temperatureValue >= 28) {
+        tips.push({ icon: "☀️", text: "Seek shade during the hottest part of the day." });
+    }
+
+    if (!Number.isNaN(temperatureValue) && temperatureValue <= 0) {
+        tips.push({ icon: "🧣", text: "Bundle up and watch your footing on icy paths." });
+    }
+
+    if (tips.length === 0) {
+        tips.push({ icon: "🌦️", text: "Enjoy the day and check the forecast before heading out." });
+    }
+
+    return tips.slice(0, 4);
+}
+
+function renderTips(props) {
+    const tipsList = document.getElementById("tipsList");
+    if (!tipsList) return;
+
+    const tips = getWeatherTips(props);
+    tipsList.innerHTML = tips
+        .map((tip) => `
+            <li class="tip-item">
+                <span class="tip-icon">${tip.icon}</span>
+                <span>${tip.text}</span>
+            </li>
+        `)
+        .join("");
+}
+
 function renderWeatherCard(props) {
     const isFavorite = isCityFavorite(props.cityName);
     weatherResult.innerHTML = `
@@ -388,6 +445,8 @@ function renderWeatherCard(props) {
             renderWeatherCard(props);
         });
     }
+
+    renderTips(props);
 }
 
 async function fetchWeatherData(city) {
@@ -575,6 +634,12 @@ if (compareBtn) {
 
 renderFavoriteCities();
 renderRecentSearches();
+renderTips({
+    condition: { label: "" },
+    temperature: "",
+    wind: "",
+    humidity: ""
+});
 updateClock();
 
 const savedCity = loadLastCity();

@@ -182,7 +182,8 @@ body::before {
 
 .favorite-searches,
 .recent-searches,
-.compare-section {
+.compare-section,
+.tips-section {
     margin-top: 18px;
     padding: 20px 18px;
     border-radius: 22px;
@@ -246,6 +247,29 @@ body::before {
     color: var(--text-soft);
     font-size: 0.95rem;
     padding: 6px 2px;
+}
+
+.tips-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tip-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-light);
+}
+
+.tip-icon {
+    font-size: 1rem;
+    line-height: 1.2;
 }
 
 .compare-inputs {
