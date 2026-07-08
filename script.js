@@ -9,6 +9,7 @@ const liveClock = document.getElementById("liveClock");
 let isLoading = false;
 const STORAGE_KEY = "weatherAppRecentSearches";
 const FAVORITES_KEY = "weatherAppFavoriteCities";
+const LAST_CITY_KEY = "weatherAppLastCity";
 
 function loadRecentSearches() {
     try {
@@ -42,6 +43,21 @@ function saveRecentSearches() {
 
 function saveFavorites() {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+}
+
+function loadLastCity() {
+    try {
+        const stored = localStorage.getItem(LAST_CITY_KEY);
+        return stored ? stored : "";
+    } catch (error) {
+        return "";
+    }
+}
+
+function saveLastCity(cityName) {
+    const cleanedName = cityName.trim();
+    if (!cleanedName) return;
+    localStorage.setItem(LAST_CITY_KEY, cleanedName);
 }
 
 function renderRecentSearches() {
@@ -290,6 +306,7 @@ async function getWeather(cityNameOverride = "") {
         }
 
         addRecentSearch(cityName);
+        saveLastCity(cityName);
 
         const weatherCardProps = {
             cityName,
@@ -424,4 +441,11 @@ if (clearHistoryBtn) {
 renderFavoriteCities();
 renderRecentSearches();
 updateClock();
+
+const savedCity = loadLastCity();
+if (savedCity) {
+    cityInput.value = savedCity;
+    getWeather(savedCity);
+}
+
 setInterval(updateClock, 1000);
