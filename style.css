@@ -2,6 +2,8 @@
     --bg-start: #0b1b34;
     --bg-mid: #13253f;
     --bg-end: #1d426d;
+    --app-background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+    --theme-glow: rgba(95, 199, 255, 0.16);
     --glass: rgba(255, 255, 255, 0.14);
     --glass-strong: rgba(255, 255, 255, 0.24);
     --border: rgba(255, 255, 255, 0.18);
@@ -27,9 +29,10 @@ body {
     align-items: center;
     background: radial-gradient(circle at top left, rgba(95, 199, 255, 0.2), transparent 26%),
                 radial-gradient(circle at bottom right, rgba(90, 126, 255, 0.18), transparent 24%),
-                linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+                var(--app-background);
     overflow-x: hidden;
     color: var(--text-light);
+    transition: background 0.8s ease, color 0.8s ease;
 }
 
 body::before {
@@ -38,6 +41,23 @@ body::before {
     inset: 0;
     background: linear-gradient(120deg, rgba(89, 142, 255, 0.16), transparent 30%, rgba(62, 123, 255, 0.18));
     pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+body.theme-rain::before {
+    opacity: 0.9;
+}
+
+body.theme-storm::before {
+    opacity: 0.95;
+}
+
+body.theme-snow::before {
+    opacity: 0.75;
+}
+
+body.theme-fog::before {
+    opacity: 0.55;
 }
 
 .app-shell {
@@ -55,6 +75,16 @@ body::before {
     box-shadow: var(--shadow);
     padding: 34px 32px;
     overflow: hidden;
+    transition: background 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
+}
+
+body.theme-rain .glass-card,
+body.theme-storm .glass-card,
+body.theme-clouds .glass-card,
+body.theme-fog .glass-card,
+body.theme-snow .glass-card,
+body.theme-clear .glass-card {
+    box-shadow: 0 20px 80px rgba(3, 12, 30, 0.26);
 }
 
 .hero {
@@ -178,6 +208,11 @@ body::before {
     padding: 30px;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
     animation: fadeInUp 0.7s ease 0.18s both;
+    transition: transform 0.8s ease, background 0.8s ease, border-color 0.8s ease;
+}
+
+.weather-card:hover {
+    transform: translateY(-2px);
 }
 
 .favorite-searches,

@@ -215,6 +215,73 @@ function getWeatherCondition(code) {
     return weatherCodeMap[code] || { label: "Unknown", emoji: "🌥️" };
 }
 
+function getThemeForCondition(conditionLabel) {
+    const label = (conditionLabel || "").toLowerCase();
+
+    if (/thunderstorm/i.test(label)) {
+        return {
+            name: "storm",
+            background: "linear-gradient(135deg, #0d1b2a 0%, #223b5e 45%, #3f5d7a 100%)",
+            accent: "#7db7ff",
+            glow: "rgba(125, 183, 255, 0.18)"
+        };
+    }
+
+    if (/rain|drizzle/i.test(label)) {
+        return {
+            name: "rain",
+            background: "linear-gradient(135deg, #0f2c44 0%, #274b63 50%, #3e637c 100%)",
+            accent: "#7cc2ff",
+            glow: "rgba(124, 194, 255, 0.18)"
+        };
+    }
+
+    if (/snow/i.test(label)) {
+        return {
+            name: "snow",
+            background: "linear-gradient(135deg, #18324f 0%, #4b6587 50%, #9ec7f0 100%)",
+            accent: "#dceeff",
+            glow: "rgba(220, 238, 255, 0.2)"
+        };
+    }
+
+    if (/fog|mist/i.test(label)) {
+        return {
+            name: "fog",
+            background: "linear-gradient(135deg, #34495e 0%, #5d6d7e 45%, #8fa4b7 100%)",
+            accent: "#dfe7ef",
+            glow: "rgba(223, 231, 239, 0.16)"
+        };
+    }
+
+    if (/cloud|overcast/i.test(label)) {
+        return {
+            name: "clouds",
+            background: "linear-gradient(135deg, #243b53 0%, #4c5f7c 45%, #7b8ea5 100%)",
+            accent: "#cfe7ff",
+            glow: "rgba(207, 231, 255, 0.16)"
+        };
+    }
+
+    return {
+        name: "clear",
+        background: "linear-gradient(135deg, #0e3b5a 0%, #2f6e95 45%, #6bb3ff 100%)",
+        accent: "#fff1b3",
+        glow: "rgba(255, 241, 179, 0.18)"
+    };
+}
+
+function applyWeatherTheme(conditionLabel) {
+    const root = document.documentElement;
+    const theme = getThemeForCondition(conditionLabel);
+    root.style.setProperty("--app-background", theme.background);
+    root.style.setProperty("--accent", theme.accent);
+    root.style.setProperty("--accent-strong", theme.accent === "#fff1b3" ? "#ffcf66" : theme.accent);
+    root.style.setProperty("--theme-glow", theme.glow);
+    document.body.classList.remove("theme-clear", "theme-clouds", "theme-rain", "theme-storm", "theme-snow", "theme-fog");
+    document.body.classList.add(`theme-${theme.name}`);
+}
+
 async function getWeather(cityNameOverride = "") {
     if (isLoading) return;
 
@@ -311,6 +378,7 @@ async function getWeather(cityNameOverride = "") {
 
         addRecentSearch(cityName);
         saveLastCity(cityName);
+        applyWeatherTheme(condition.label);
 
         const weatherCardProps = {
             cityName,
