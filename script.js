@@ -345,30 +345,36 @@ function getWeatherTips(props) {
 
     if (/rain|drizzle|thunderstorm/i.test(conditionLabel)) {
         tips.push({ icon: "☔", text: "Carry an umbrella." });
+        tips.push({ icon: "🛣️", text: "Roads may be slippery, so drive carefully." });
     }
 
     if (/sunny|mainly clear|clear|partly cloudy/i.test(conditionLabel)) {
         tips.push({ icon: "🕶️", text: "Wear sunglasses and stay hydrated." });
+        tips.push({ icon: "☀️", text: "Plan outdoor activities earlier or later in the day." });
     }
 
     if (!Number.isNaN(temperatureValue) && temperatureValue <= 10) {
-        tips.push({ icon: "🧥", text: "Wear warm clothing." });
+        tips.push({ icon: "🧥", text: "Wear warm clothing and keep a layer handy." });
     }
 
     if (!Number.isNaN(windValue) && windValue >= 20) {
-        tips.push({ icon: "💨", text: "Be careful with loose items outdoors." });
+        tips.push({ icon: "💨", text: "Secure loose items outdoors and watch for gusts." });
     }
 
     if (!Number.isNaN(humidityValue) && humidityValue >= 70) {
-        tips.push({ icon: "💧", text: "Keep water handy and choose breathable clothing." });
+        tips.push({ icon: "💧", text: "Choose breathable clothing and keep water close by." });
     }
 
     if (!Number.isNaN(temperatureValue) && temperatureValue >= 28) {
-        tips.push({ icon: "☀️", text: "Seek shade during the hottest part of the day." });
+        tips.push({ icon: "🌡️", text: "Seek shade during the hottest part of the day." });
     }
 
     if (!Number.isNaN(temperatureValue) && temperatureValue <= 0) {
         tips.push({ icon: "🧣", text: "Bundle up and watch your footing on icy paths." });
+    }
+
+    if (/fog/i.test(conditionLabel)) {
+        tips.push({ icon: "🚗", text: "Drive carefully and keep extra following distance." });
     }
 
     if (tips.length === 0) {

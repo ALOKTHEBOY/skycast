@@ -249,6 +249,14 @@ body::before {
     padding: 6px 2px;
 }
 
+.tips-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 16px;
+    animation: fadeInUp 0.6s ease both;
+}
+
 .tips-list {
     list-style: none;
     display: flex;
